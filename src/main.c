@@ -23,13 +23,15 @@ static int __init keyboard_driver_init(void)
 		return res;
 	}
 
+	pr_info("Custom keyboard driver is loaded !\n");
+
 	return 0;
 }
 
 static void __exit keyboard_driver_exit(void)
 {
 	usb_deregister(&keyboard_driver);
-	pr_info("Exit module\n");
+	pr_info("Custom keyboard driver is unloaded\n");
 }
 
 module_init(keyboard_driver_init);
