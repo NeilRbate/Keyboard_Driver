@@ -42,11 +42,15 @@ int keyboard_probe(struct usb_interface *interface, const struct usb_device_id *
 		return -ENOMEM;
 	}
 
-	input_dev->name = "Custom USB Keyboard";
-	input_dev->phys = "usb/keyboard";
+	input_dev->name = "My usb keyboard driver";
+	input_dev->phys = "usb/my_keyboard";
 	input_dev->id.bustype = BUS_USB;
 	input_dev->evbit[0] = BIT(EV_KEY) | BIT(EV_SYN);
-	input_dev->keybit[BIT_WORD(KEY_A)] = BIT(KEY_A) | BIT(KEY_B);  // Example keys
+	for (int i = 0; i < KEY_CNT; i++) {
+        set_bit(i, input_dev->keybit); // Enable every key code
+    	}
+
+	//input_dev->keybit[BIT_WORD(KEY_A)] = BIT(KEY_A) | BIT(KEY_B);  // Example keys
 
 	res = input_register_device(input_dev);
 	if (res) {

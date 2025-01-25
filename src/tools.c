@@ -187,10 +187,8 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 
 	//Key down
 	for (i = 0; i < 6; i++) {
-		if (keycode[i] && keycode[i] < sizeof(keycode_to_name)/sizeof(keycode_to_name[0])) {
-			printk(KERN_INFO "Key Pressed: %s\n", keycode_to_name[keycode[i]]);
+		if (keycode[i]) 
 			input_report_key(input, keycode[i], KEY_DOWN);
-		}
 	}
 	input_sync(input);
 
