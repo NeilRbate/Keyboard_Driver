@@ -32,7 +32,7 @@ const char hid_to_linux_keycode[256] = {
 	[0x26] = KEY_9,
 	[0x27] = KEY_0,
 	[0x2D] = KEY_MINUS,
-	[0x2C] = KEY_EQUAL,
+	[0x2E] = KEY_EQUAL,
 	[0x2A] = KEY_BACKSPACE,
 	[0x49] = KEY_INSERT,
 	[0x4A] = KEY_HOME,
@@ -95,6 +95,18 @@ const char hid_to_linux_keycode[256] = {
 	[0x4F] = KEY_RIGHT,
 };
 
+static const struct {
+	unsigned int mask;
+	unsigned int keycode;
+} modifiers_key[] = {
+	{0x02, KEY_LEFTSHIFT},
+	{0x20, KEY_RIGHTSHIFT},
+	{0x01, KEY_LEFTCTRL},
+	{0x10, KEY_RIGHTCTRL},
+	{0x04, KEY_LEFTALT},
+	{0x40, KEY_RIGHTALT},
+};
+
 int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int size)
 {
 
@@ -115,19 +127,15 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 	keycode = &data[2];
 	modifiers = data[0];
 
-	if ((modifiers & 0x02) != (prev_modifiers & 0x02)) // Left Shift
-		input_report_key(input, KEY_LEFTSHIFT, (modifiers & 0x01) ? 1 : 0);
-	if ((modifiers & 0x20) != (prev_modifiers & 0x20)) // Right Shift
-		input_report_key(input, KEY_RIGHTSHIFT, (modifiers & 0x02) ? 1 : 0);
-	if ((modifiers & 0x01) != (prev_modifiers & 0x01)) // Left Ctrl
-		input_report_key(input, KEY_LEFTCTRL, (modifiers & 0x04) ? 1 : 0);
-	if ((modifiers & 0x10) != (prev_modifiers & 0x10)) // Right Ctrl
-		input_report_key(input, KEY_RIGHTCTRL, (modifiers & 0x08) ? 1 : 0);
-	if ((modifiers & 0x04) != (prev_modifiers & 0x4)) // Left Alt
-		input_report_key(input, KEY_LEFTALT, (modifiers & 0x10) ? 1 : 0);
-	if ((modifiers & 0x40) != (prev_modifiers & 0x40)) // Right Alt
-		input_report_key(input, KEY_RIGHTALT, (modifiers & 0x20) ? 1 : 0);
+	//Search for pressed modifiers key (Shift, Ctrl, Alt)
+	for (i = 0; i < 6; i++) {
+		if ((modifiers & modifiers_key[i].mask) != (prev_modifiers & modifiers_key[i].mask)) {
+			input_report_key(input, modifiers_key[i].keycode,
+					(modifiers & modifiers_key[i].mask) ? 1 : 0);
+		}
+	}
 
+	//Search for pressed key
 	for (i = 0; i < 6; i++) {
 		if (keycode[i] && !memchr(prev_keycode, keycode[i], 6)) {
 			unsigned char key = hid_to_linux_keycode[keycode[i]];
@@ -135,6 +143,7 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 		}
 	}
 
+	//Search for unpressed key
 	for (i = 0; i < 6; i++) {
 		if (prev_keycode[i] && !memchr(keycode, prev_keycode[i], 6)) {
 			unsigned char key = hid_to_linux_keycode[prev_keycode[i]];
@@ -148,59 +157,6 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 	memcpy(prev_keycode, keycode, 6);
 
 	return 0;
-
-	/*
-	struct input_dev	*input;
-	unsigned char		*keycode;
-	unsigned int		modifiers;
-	int 			i;
-
-	if (size < 8) {
-		pr_err("invalid report size\n");
-		return -EINVAL;
-	}
-
-	input = keyboard->input;
-	keycode = &data[2];
-	modifiers = data[0];
-
-	//Key down
-	for (i = 0; i < 6; i++) {
-		if (keycode[i]) {
-			unsigned char key = hid_to_linux_keycode[keycode[i]];
-
-			if ((modifiers & 0x01) || (modifiers & 0x02)) {
-				input_report_key(input, KEY_LEFTSHIFT, 1);
-				input_report_key(input, key, 1);
-				input_report_key(input, KEY_LEFTSHIFT, 0);
-			}
-			else if ((modifiers & 0x04) || (modifiers & 0x08)) {
-				input_report_key(input, KEY_LEFTCTRL, 1);
-				input_report_key(input, key, 1);
-				input_report_key(input, KEY_LEFTCTRL, 0);
-			}
-			else if ((modifiers & 0x10) || modifiers & 0x20) {
-				input_report_key(input, KEY_LEFTALT, 1);
-				input_report_key(input, key, 1);
-				input_report_key(input, KEY_LEFTALT, 0);
-			}
-			else
-				input_report_key(input, key, 1);
-		}	
-	}
-	input_sync(input);
-
-	//Key up
-	for (i = 0; i < 6; i++) {
-		if (keycode[i]) {
-			unsigned char key = hid_to_linux_keycode[keycode[i]];
-			input_report_key(input, key, 0);
-		}
-	}
-	input_sync(input);
-
-	return 0;
-	*/
 }
 
 EXPORT_SYMBOL_GPL(parse_hid_report);
