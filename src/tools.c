@@ -100,7 +100,7 @@ static unsigned char	compute_keycode(unsigned char *data, int i)
 {
 	unsigned char	*keycode;
 	unsigned int	modifiers;
-	unsigned char	*res;
+	unsigned char	res;
 	bool		shift;
 
 	shift = false;
