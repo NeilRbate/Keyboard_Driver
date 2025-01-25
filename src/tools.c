@@ -168,7 +168,6 @@ const char *keycode_to_name[] = {
     "Page Down",               // 0xF1
 };
 
-
 int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int size)
 {
 	struct input_dev *input;
@@ -189,6 +188,8 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 	for (i = 0; i < 6; i++) {
 		if (keycode[i]) { 
 			pr_debug("Keycode -> %x\n", keycode[i]);
+			if (keycode[i] == 0x14)
+				input_report_key(input, KEY_Q, KEY_DOWN);
 			input_report_key(input, keycode[i], KEY_DOWN);
 		}
 	}
