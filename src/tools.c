@@ -115,17 +115,17 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 	keycode = &data[2];
 	modifiers = data[0];
 
-	if ((modifiers & 0x01) != (prev_modifiers & 0x01)) // Left Shift
+	if ((modifiers & 0x02) != (prev_modifiers & 0x02)) // Left Shift
 		input_report_key(input, KEY_LEFTSHIFT, (modifiers & 0x01) ? 1 : 0);
-	if ((modifiers & 0x02) != (prev_modifiers & 0x02)) // Right Shift
+	if ((modifiers & 0x20) != (prev_modifiers & 0x20)) // Right Shift
 		input_report_key(input, KEY_RIGHTSHIFT, (modifiers & 0x02) ? 1 : 0);
-	if ((modifiers & 0x04) != (prev_modifiers & 0x04)) // Left Ctrl
+	if ((modifiers & 0x01) != (prev_modifiers & 0x01)) // Left Ctrl
 		input_report_key(input, KEY_LEFTCTRL, (modifiers & 0x04) ? 1 : 0);
-	if ((modifiers & 0x08) != (prev_modifiers & 0x08)) // Right Ctrl
+	if ((modifiers & 0x10) != (prev_modifiers & 0x10)) // Right Ctrl
 		input_report_key(input, KEY_RIGHTCTRL, (modifiers & 0x08) ? 1 : 0);
-	if ((modifiers & 0x10) != (prev_modifiers & 0x10)) // Left Alt
+	if ((modifiers & 0x04) != (prev_modifiers & 0x4)) // Left Alt
 		input_report_key(input, KEY_LEFTALT, (modifiers & 0x10) ? 1 : 0);
-	if ((modifiers & 0x20) != (prev_modifiers & 0x20)) // Right Alt
+	if ((modifiers & 0x40) != (prev_modifiers & 0x40)) // Right Alt
 		input_report_key(input, KEY_RIGHTALT, (modifiers & 0x20) ? 1 : 0);
 
 	for (i = 0; i < 6; i++) {
