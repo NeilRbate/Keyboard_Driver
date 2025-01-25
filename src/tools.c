@@ -96,13 +96,12 @@ const char hid_to_linux_keycode[256] = {
 };
 
 //TODO Catch shift + ctrl with modifier bit
-static unsigned char	compute_keycode(unsigned char *data)
+static unsigned char	compute_keycode(unsigned char *data, int i)
 {
 	unsigned char	*keycode;
 
 	keycode = &data[2];
-
-	return *keycode;
+	return hid_to_linux_keycode[keycode[i]];
 }
 
 int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int size)
@@ -122,7 +121,7 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 	//Key down
 	for (i = 0; i < 6; i++) {
 		if (keycode[i]) {
-			unsigned char correct_code = compute_keycode(data);
+			unsigned char correct_code = compute_keycode(data, i);
 			input_report_key(input, correct_code, 1);
 		}
 	}
@@ -131,7 +130,7 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 	//Key up
 	for (i = 0; i < 6; i++) {
 		if (keycode[i]) {
-			unsigned char correct_code = compute_keycode(data);
+			unsigned char correct_code = compute_keycode(data, i);
 			input_report_key(input, correct_code, 0);
 		}
 	}
