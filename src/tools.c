@@ -255,18 +255,15 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 
 	//Key down
 	for (i = 0; i < 6; i++) {
-		if (keycode[i]) { 
+		if (keycode[i])
 			input_report_key(input, hid_to_linux_keycode[keycode[i]], KEY_DOWN);
-			//input_report_key(input, keycode[i], KEY_DOWN);
-		}
 	}
 	input_sync(input);
 
 	//Key up
 	for (i = 0; i < 6; i++) {
-		if (keycode[i]) {
-			input_report_key(input, keycode[i], KEY_UP);
-		}
+		if (keycode[i])
+			input_report_key(input, hid_to_linux_keycode[keycode[i]], KEY_UP);
 	}
 	input_sync(input);
 

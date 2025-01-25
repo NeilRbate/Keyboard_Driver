@@ -46,6 +46,7 @@ int keyboard_probe(struct usb_interface *interface, const struct usb_device_id *
 	input_dev->phys = "usb/my_keyboard";
 	input_dev->id.bustype = BUS_USB;
 	input_dev->evbit[0] = BIT(EV_KEY) | BIT(EV_SYN);
+
 	for (int i = 0; i < KEY_CNT; i++) {
         set_bit(i, input_dev->keybit); // Enable every key code
     	}
