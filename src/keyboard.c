@@ -1,5 +1,8 @@
 #include "../include/include.h"
 
+EXPORT_SYMBOL_GPL(keyboard_disconnect);
+EXPORT_SYMBOL_GPL(keyboard_probe);
+
 void keyboard_irq(struct urb *urb)
 {
 	struct usb_keyboard *keyboard;
@@ -103,6 +106,3 @@ void keyboard_disconnect(struct usb_interface *interface)
 	usb_put_dev(keyboard->udev);
 	kfree(keyboard);
 }
-
-EXPORT_SYMBOL_GPL(keyboard_disconnect);
-EXPORT_SYMBOL_GPL(keyboard_probe);
