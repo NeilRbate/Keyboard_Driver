@@ -99,8 +99,22 @@ const char hid_to_linux_keycode[256] = {
 static unsigned char	compute_keycode(unsigned char *data, int i)
 {
 	unsigned char	*keycode;
+	unsigned int	modifiers;
+	unsigned char	*res;
+	bool		shift;
 
+	shift = false;
+	modifiers = data[0];
+
+	if ((modifiers & 0x01) || (modifiers & 0x02))
+		shift = true;
 	keycode = &data[2];
+
+	res = hid_to_linux_keycode[keycode[i]];
+
+	if (shift && res >= KEY_A || res <+ KEY_Z)
+		return res + 32;
+
 	return hid_to_linux_keycode[keycode[i]];
 }
 
