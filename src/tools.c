@@ -95,34 +95,12 @@ const char hid_to_linux_keycode[256] = {
 	[0x4F] = KEY_RIGHT,
 };
 
-//TODO Catch shift + ctrl with modifier bit
-static unsigned char	compute_keycode(unsigned char *data, int i)
-{
-	unsigned char	*keycode;
-	unsigned int	modifiers;
-	unsigned char	res;
-	bool		shift;
-
-	shift = false;
-	modifiers = data[0];
-
-	if ((modifiers & 0x01) || (modifiers & 0x02))
-		shift = true;
-	keycode = &data[2];
-
-	res = hid_to_linux_keycode[keycode[i]];
-
-	if (shift && res >= KEY_A || res <+ KEY_Z)
-		return res + 32;
-
-	return hid_to_linux_keycode[keycode[i]];
-}
-
 int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int size)
 {
-	struct input_dev *input;
-	unsigned char *keycode;
-	int i;
+	struct input_dev	*input;
+	unsigned char		*keycode;
+	unsigned int		modifiers;
+	int 			i;
 
 	if (size < 8) {
 		pr_err("invalid report size\n");
@@ -131,21 +109,39 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 
 	input = keyboard->input;
 	keycode = &data[2];
+	modifiers = data[0];
 
 	//Key down
 	for (i = 0; i < 6; i++) {
 		if (keycode[i]) {
-			unsigned char correct_code = compute_keycode(data, i);
-			input_report_key(input, correct_code, 1);
-		}
+			unsigned char key = hid_to_linux_keycode[keycode[i]];
+
+			if ((modifiers & 0x01) || (modifiers & 0x02)) {
+				input_report_key(input, KEY_LEFTSHIFT, 1);
+				input_report_key(input, key, 1);
+				input_report_key(input, KEY_LEFTSHIFT, 0);
+			}
+			else if ((modifiers & 0x04) || (modifiers & 0x08)) {
+				input_report_key(input, KEY_LEFTCTRL, 1);
+				input_report_key(input, key, 1);
+				input_report_key(input, KEY_LEFTCTRL, 0);
+			}
+			else if ((modifiers & 0x10) || modifiers & 0x20) {
+				input_report_key(input, KEY_LEFTALT, 1);
+				input_report_key(input, key, 1);
+				input_report_key(input, KEY_LEFTALT, 0);
+			}
+			else
+				input_report_key(input, key, 1);
+		}	
 	}
 	input_sync(input);
 
 	//Key up
 	for (i = 0; i < 6; i++) {
 		if (keycode[i]) {
-			unsigned char correct_code = compute_keycode(data, i);
-			input_report_key(input, correct_code, 0);
+			unsigned char key = hid_to_linux_keycode[keycode[i]];
+			input_report_key(input, key, 0);
 		}
 	}
 	input_sync(input);
