@@ -97,6 +97,59 @@ const char hid_to_linux_keycode[256] = {
 
 int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int size)
 {
+
+	struct input_dev *input;
+	unsigned char *keycode;
+	unsigned int modifiers;
+	int i;
+
+	static unsigned int prev_modifiers = 0;
+	static unsigned char prev_keycode[6] = {0};
+
+	if (size < 8) {
+		pr_err("invalid report size\n");
+		return -EINVAL;
+	}
+
+	input = keyboard->input;
+	keycode = &data[2];
+	modifiers = data[0];
+
+	if ((modifiers & 0x01) != (prev_modifiers & 0x01)) // Left Shift
+		input_report_key(input, KEY_LEFTSHIFT, (modifiers & 0x01) ? 1 : 0);
+	if ((modifiers & 0x02) != (prev_modifiers & 0x02)) // Right Shift
+		input_report_key(input, KEY_RIGHTSHIFT, (modifiers & 0x02) ? 1 : 0);
+	if ((modifiers & 0x04) != (prev_modifiers & 0x04)) // Left Ctrl
+		input_report_key(input, KEY_LEFTCTRL, (modifiers & 0x04) ? 1 : 0);
+	if ((modifiers & 0x08) != (prev_modifiers & 0x08)) // Right Ctrl
+		input_report_key(input, KEY_RIGHTCTRL, (modifiers & 0x08) ? 1 : 0);
+	if ((modifiers & 0x10) != (prev_modifiers & 0x10)) // Left Alt
+		input_report_key(input, KEY_LEFTALT, (modifiers & 0x10) ? 1 : 0);
+	if ((modifiers & 0x20) != (prev_modifiers & 0x20)) // Right Alt
+		input_report_key(input, KEY_RIGHTALT, (modifiers & 0x20) ? 1 : 0);
+
+	for (i = 0; i < 6; i++) {
+		if (keycode[i] && !memchr(prev_keycode, keycode[i], 6)) {
+			unsigned char key = hid_to_linux_keycode[keycode[i]];
+			input_report_key(input, key, 1);
+		}
+	}
+
+	for (i = 0; i < 6; i++) {
+		if (prev_keycode[i] && !memchr(keycode, prev_keycode[i], 6)) {
+			unsigned char key = hid_to_linux_keycode[prev_keycode[i]];
+			input_report_key(input, key, 0);
+		}
+	}
+
+	input_sync(input);
+
+	prev_modifiers = modifiers;
+	memcpy(prev_keycode, keycode, 6);
+
+	return 0;
+
+	/*
 	struct input_dev	*input;
 	unsigned char		*keycode;
 	unsigned int		modifiers;
@@ -147,6 +200,7 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 	input_sync(input);
 
 	return 0;
+	*/
 }
 
 EXPORT_SYMBOL_GPL(parse_hid_report);
