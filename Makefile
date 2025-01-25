@@ -1,4 +1,6 @@
-obj-m += src/main.o
+obj-m += src/main.o \
+	src/keyboard.o \
+	src/tools.o
 
 all:	
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules

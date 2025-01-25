@@ -11,10 +11,8 @@
 
 #define USB_KEYBOARD_VENDOR_ID 0x046d
 #define USB_KEYBOARD_PRODUCT_ID 0xc328
-//#define KEY_DOWN 1
-//#define KEY_UP 0
 
-static struct usb_device_id keyboard_table [] = {
+struct usb_device_id keyboard_table [] = {
         { USB_DEVICE(USB_KEYBOARD_VENDOR_ID, USB_KEYBOARD_PRODUCT_ID) },
         { }
 };
@@ -26,7 +24,19 @@ struct usb_keyboard {
     unsigned char *irq_buf;
 };
 
-static const char *keycode_to_name[] = {
+void keyboard_irq(struct urb *urb);
+int keyboard_probe(struct usb_interface *interface, const struct usb_device_id *id);
+void keyboard_disconnect(struct usb_interface *interface);
+int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int size);
+
+struct usb_driver keyboard_driver = {
+	.name = "my_keyboard_driver",
+	.id_table = keyboard_table,
+	.probe = keyboard_probe,
+	.disconnect = keyboard_disconnect,
+};
+
+const char *keycode_to_name[] = {
     "Reserved",                // 0x00
     "Error Roll-Over",         // 0x01
     "POST Error",              // 0x02
