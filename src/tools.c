@@ -187,8 +187,10 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 
 	//Key down
 	for (i = 0; i < 6; i++) {
-		if (keycode[i]) 
+		if (keycode[i]) { 
+			pr_debug("Keycode -> %x\n", keycode[i]);
 			input_report_key(input, keycode[i], KEY_DOWN);
+		}
 	}
 	input_sync(input);
 
