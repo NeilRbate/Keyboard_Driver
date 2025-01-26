@@ -99,21 +99,32 @@ int keyboard_probe(struct usb_interface *interface, const struct usb_device_id *
 
 void keyboard_disconnect(struct usb_interface *interface)
 {
-	pr_info("1\n");
 	struct usb_keyboard *keyboard = usb_get_intfdata(interface);
 
-	pr_info("1\n");
-	usb_kill_urb(keyboard->irq_urb);
-	pr_info("2\n");
-	usb_free_urb(keyboard->irq_urb);
-	pr_info("3\n");
-	kfree(keyboard->irq_buf);
-	pr_info("4\n");
+	if (!keyboard) {
+		pr_err("No data to disconnect\n");
+		return;
+	}
 
-	input_unregister_device(keyboard->input);
-	pr_info("5\n");
-	usb_put_dev(keyboard->udev);
-	pr_info("6\n");
+	usb_set_intfdata(interface, NULL);
+
+	if (keyboard->irq_urb) {
+		usb_kill_urb(keyboard->irq_urb);
+		usb_free_urb(keyboard->irq_urb);
+		keyboard->irq_urb = NULL;
+	}
+
+	if (keyboard->irq_buf) {
+		kfree(keyboard->irq_buf);
+		keyboard->irq_buf = NULL;
+	}
+
+	if (keyboard->input)
+		input_unregister_device(keyboard->input);
+	if (keyboard->udev)
+		usb_put_dev(keyboard->udev);
+
 	kfree(keyboard);
-	pr_info("7\n");
+
+	pr_info("Keyboard disconnect properly\n");
 }

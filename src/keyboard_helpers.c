@@ -127,6 +127,8 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 	keycode = &data[2];
 	modifiers = data[0];
 
+	pr_info("keycode -> %d\n", keycode);
+
 	//Search for pressed modifiers key (Shift, Ctrl, Alt)
 	for (i = 0; i < 6; i++) {
 		if ((modifiers & modifiers_key[i].mask) != (prev_modifiers & modifiers_key[i].mask)) {
