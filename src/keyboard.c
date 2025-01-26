@@ -99,13 +99,21 @@ int keyboard_probe(struct usb_interface *interface, const struct usb_device_id *
 
 void keyboard_disconnect(struct usb_interface *interface)
 {
+	pr_info("1\n");
 	struct usb_keyboard *keyboard = usb_get_intfdata(interface);
 
+	pr_info("1\n");
 	usb_kill_urb(keyboard->irq_urb);
+	pr_info("2\n");
 	usb_free_urb(keyboard->irq_urb);
+	pr_info("3\n");
 	kfree(keyboard->irq_buf);
+	pr_info("4\n");
 
 	input_unregister_device(keyboard->input);
+	pr_info("5\n");
 	usb_put_dev(keyboard->udev);
+	pr_info("6\n");
 	kfree(keyboard);
+	pr_info("7\n");
 }

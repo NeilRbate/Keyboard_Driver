@@ -1,6 +1,6 @@
 #include "../include/include.h"
 
-const char hid_to_linux_keycode[256] = {
+const int hid_to_linux_keycode[256] = {
 	//Row 1
 	[0x29] = KEY_ESC,
 	[0x3A] = KEY_F1,
