@@ -1,5 +1,99 @@
 #include "../include/include.h"
 
+struct key_translation {
+    unsigned int keycode;
+    const char *name;
+    unsigned char ascii;
+};
+
+static struct key_translation keymap[] = {
+    { KEY_A, "a", 'a' },
+    { KEY_B, "b", 'b' },
+    { KEY_C, "c", 'c' },
+    { KEY_D, "d", 'd' },
+    { KEY_E, "e", 'e' },
+    { KEY_F, "f", 'f' },
+    { KEY_G, "g", 'g' },
+    { KEY_H, "h", 'h' },
+    { KEY_I, "i", 'i' },
+    { KEY_J, "j", 'j' },
+    { KEY_K, "k", 'k' },
+    { KEY_L, "l", 'l' },
+    { KEY_M, "m", 'm' },
+    { KEY_N, "n", 'n' },
+    { KEY_O, "o", 'o' },
+    { KEY_P, "p", 'p' },
+    { KEY_Q, "q", 'q' },
+    { KEY_R, "r", 'r' },
+    { KEY_S, "s", 's' },
+    { KEY_T, "t", 't' },
+    { KEY_U, "u", 'u' },
+    { KEY_V, "v", 'v' },
+    { KEY_W, "w", 'w' },
+    { KEY_X, "x", 'x' },
+    { KEY_Y, "y", 'y' },
+    { KEY_Z, "z", 'z' },
+
+    { KEY_1, "1", '1' },
+    { KEY_2, "2", '2' },
+    { KEY_3, "3", '3' },
+    { KEY_4, "4", '4' },
+    { KEY_5, "5", '5' },
+    { KEY_6, "6", '6' },
+    { KEY_7, "7", '7' },
+    { KEY_8, "8", '8' },
+    { KEY_9, "9", '9' },
+    { KEY_0, "0", '0' },
+
+    { KEY_ENTER, "return", '\n' },
+    { KEY_SPACE, "space", ' ' },
+    { KEY_BACKSPACE, "backspace", '\b' },
+    { KEY_TAB, "tab", '\t' },
+    { KEY_ESC, "escape", 27 },
+
+    { KEY_MINUS, "-", '-' },
+    { KEY_EQUAL, "=", '=' },
+    { KEY_LEFTBRACE, "[", '[' },
+    { KEY_RIGHTBRACE, "]", ']' },
+    { KEY_BACKSLASH, "\\", '\\' },
+    { KEY_SEMICOLON, ";", ';' },
+    { KEY_APOSTROPHE, "'", '\'' },
+    { KEY_GRAVE, "`", '`' },
+    { KEY_COMMA, ",", ',' },
+    { KEY_DOT, ".", '.' },
+    { KEY_SLASH, "/", '/' },
+
+    { KEY_CAPSLOCK, "capslock", 0 },
+    { KEY_LEFTSHIFT, "left shift", 0 },
+    { KEY_RIGHTSHIFT, "right shift", 0 },
+    { KEY_LEFTCTRL, "left ctrl", 0 },
+    { KEY_RIGHTCTRL, "right ctrl", 0 },
+    { KEY_LEFTALT, "left alt", 0 },
+    { KEY_RIGHTALT, "right alt", 0 },
+
+    { KEY_F1, "F1", 0 },
+    { KEY_F2, "F2", 0 },
+    { KEY_F3, "F3", 0 },
+    { KEY_F4, "F4", 0 },
+    { KEY_F5, "F5", 0 },
+    { KEY_F6, "F6", 0 },
+    { KEY_F7, "F7", 0 },
+    { KEY_F8, "F8", 0 },
+    { KEY_F9, "F9", 0 },
+    { KEY_F10, "F10", 0 },
+    { KEY_F11, "F11", 0 },
+    { KEY_F12, "F12", 0 },
+
+    { KEY_DELETE, "delete", 0 },
+    { KEY_HOME, "home", 0 },
+    { KEY_END, "end", 0 },
+    { KEY_PAGEUP, "page up", 0 },
+    { KEY_PAGEDOWN, "page down", 0 },
+    { KEY_INSERT, "insert", 0 },
+
+    { 0, NULL, 0 } // Fin du tableau
+};
+
 const int hid_to_linux_keycode[256] = {
 	//Row 1
 	[0x29] = KEY_ESC,
@@ -147,8 +241,8 @@ static void	add_key_event(unsigned char keycode, bool pressed)
 
 	event->keycode = keycode;
 	event->pressed = pressed ? 'P' : 'R';
-	//memcpy(event->, keymap[keycode], sizeof(keymap[keycode]));
-	//event->ascii = 
+	memcpy(event->key_name, keymap[keycode].name, strlen(keymap[keycode].name));
+	event->ascii_value = keymap[keycode].ascii;
 	ktime_get_real_ts64(&ts);
 	event->timestamp = ts;
 
