@@ -110,13 +110,13 @@ static const struct {
 int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int size)
 {
 
-	struct input_dev *input;
-	unsigned char *keycode;
-	unsigned int modifiers;
-	int i;
+	int			i;
+	struct input_dev	*input;
+	unsigned char		*keycode;
+	unsigned int		modifiers;
+	static unsigned int	prev_modifiers = 0;
+	static unsigned char	prev_keycode[6] = {0};
 
-	static unsigned int prev_modifiers = 0;
-	static unsigned char prev_keycode[6] = {0};
 
 	if (size < 8) {
 		pr_err("invalid report size\n");
@@ -126,8 +126,6 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 	input = keyboard->input;
 	keycode = &data[2];
 	modifiers = data[0];
-
-	pr_info("keycode -> %d\n", keycode);
 
 	//Search for pressed modifiers key (Shift, Ctrl, Alt)
 	for (i = 0; i < 6; i++) {

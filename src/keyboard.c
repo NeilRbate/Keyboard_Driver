@@ -5,15 +5,21 @@ EXPORT_SYMBOL_GPL(keyboard_probe);
 
 void keyboard_irq(struct urb *urb)
 {
-	struct usb_keyboard *keyboard;
-	unsigned char *data;
-	int size;
+	struct usb_keyboard	*keyboard;
+	unsigned char		*data;
+	int			size;
 
 	keyboard = urb->context;
 	data = urb->transfer_buffer;
        	size = urb->actual_length;
 
 	if (urb->status) {
+
+		if (urb->status == -ESHUTDOWN) {
+			pr_info("Keyboard disconnected\n");
+			return;
+		}
+
 		pr_err("URB error: %d\n", urb->status);
 		return;
 	}
@@ -24,18 +30,19 @@ void keyboard_irq(struct urb *urb)
 
 int keyboard_probe(struct usb_interface *interface, const struct usb_device_id *id)
 {
-	struct usb_keyboard *keyboard;
-	struct input_dev *input_dev;
-	int res;
+	struct usb_keyboard	*keyboard;
+	struct input_dev	*input_dev;
+	int			res;
 
 	keyboard = kzalloc(sizeof(struct usb_keyboard), GFP_KERNEL);
 	if (!keyboard) {
 		pr_err("failed to allocated memory\n");
 		return -ENOMEM;
 	}
-	keyboard->udev = usb_get_dev(interface_to_usbdev(interface));
 
+	keyboard->udev = usb_get_dev(interface_to_usbdev(interface));
 	input_dev = input_allocate_device();
+
 	if (!input_dev) {
 		pr_err("failed to allocated memory\n");
 		kfree(keyboard);
@@ -45,15 +52,14 @@ int keyboard_probe(struct usb_interface *interface, const struct usb_device_id *
 	input_dev->name = "My usb keyboard driver";
 	input_dev->phys = "usb/my_keyboard";
 	input_dev->id.bustype = BUS_USB;
-	input_dev->evbit[0] = BIT(EV_KEY) | BIT(EV_SYN);
-	set_bit(EV_REP, input_dev->evbit);
+	input_dev->evbit[0] = BIT(EV_KEY) | BIT(EV_SYN) | BIT(EV_REP);
 
 	for (int i = 0; i < KEY_CNT; i++)
         	set_bit(i, input_dev->keybit); // Enable every key code
 
 	res = input_register_device(input_dev);
 	if (res) {
-		pr_err("input_register_device failed. error number %d\n", res);
+		pr_err("input_register_device failed\n");
 		input_free_device(input_dev);
 		kfree(keyboard);
 		return res;
@@ -61,7 +67,7 @@ int keyboard_probe(struct usb_interface *interface, const struct usb_device_id *
 
 	keyboard->input = input_dev;
 
-	keyboard->irq_buf = kmalloc(8, GFP_KERNEL);
+	keyboard->irq_buf = kzalloc(8, GFP_KERNEL);
 	if (!keyboard->irq_buf) {
 		pr_err("failed to allocated memory\n");
 		input_unregister_device(input_dev);
