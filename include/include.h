@@ -22,6 +22,18 @@ struct usb_keyboard {
     unsigned char *irq_buf;
 };
 
+struct key_event {
+	unsigned int		keycode;
+	char			pressed;
+	char			key_name[32];
+	char			ascii_value;
+	struct timespec64	timestamp;
+	struct list_head	list;
+};
+
+static LIST_HEAD(event_list);
+static DEFINE_SPINLOCK(event_list_lock);
+
 void keyboard_irq(struct urb *urb);
 int keyboard_probe(struct usb_interface *interface, const struct usb_device_id *id);
 void keyboard_disconnect(struct usb_interface *interface);

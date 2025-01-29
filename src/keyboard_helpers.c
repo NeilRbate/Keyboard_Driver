@@ -1,8 +1,5 @@
 #include "../include/include.h"
 
-bool	is_kp(unsigned char keycode);
-unsigned char convert_kp(unsigned char keycode);
-
 const int hid_to_linux_keycode[256] = {
 	//Row 1
 	[0x29] = KEY_ESC,
@@ -137,14 +134,39 @@ static const struct {
 	{0x40, KEY_RIGHTALT},
 };
 
-bool	is_kp(unsigned char keycode)
+static void	add_key_event(unsigned char keycode, bool pressed)
+{
+	struct key_event	*event;
+	struct timespec64	ts;
+
+	event = kmalloc(sizeof(*event), GFP_KERNEL);
+	if (!event) {
+		pr_err("failed to allocated memory\n");
+		return ;
+	}
+
+	event->keycode = keycode;
+	event->pressed = pressed ? 'P' : 'R';
+	//memcpy(event->, keymap[keycode], sizeof(keymap[keycode]));
+	//event->ascii = 
+	ktime_get_real_ts64(&ts);
+	event->timestamp = ts;
+
+	spin_lock(&event_list_lock);
+
+	list_add_tail(&event->list, &event_list);
+
+	spin_unlock(&event_list_lock);
+}
+
+static bool	is_kp(unsigned char keycode)
 {
 	if (keycode >= 0x54 && keycode <= 0x63)
 		return true;
 	return false;
 }
 
-unsigned char convert_kp(unsigned char keycode)
+static unsigned char convert_kp(unsigned char keycode)
 {
 	switch (keycode) {
 
@@ -220,6 +242,8 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 			if (key == KEY_NUMLOCK) {
 				numlock = !numlock;
 			}
+			add_key_event(key, true);
+
 			if (capslock)
 				input_report_key(input, KEY_LEFTSHIFT, 1);
 
@@ -242,6 +266,7 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 
 			if (!numlock && is_kp(keycode[i]))
 				key = convert_kp(keycode[i]);
+			add_key_event(key, false);
 
 			input_report_key(input, key, 0);
 		}
