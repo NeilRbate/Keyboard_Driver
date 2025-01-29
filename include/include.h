@@ -27,7 +27,4 @@ int keyboard_probe(struct usb_interface *interface, const struct usb_device_id *
 void keyboard_disconnect(struct usb_interface *interface);
 int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int size);
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Julien Barbate");
-MODULE_DESCRIPTION("This is an USB keyboard device driver");
 #endif

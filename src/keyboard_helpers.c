@@ -116,6 +116,7 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 	unsigned int		modifiers;
 	static unsigned int	prev_modifiers = 0;
 	static unsigned char	prev_keycode[6] = {0};
+	static bool		capslock	= false;
 
 
 	if (size < 8) {
@@ -139,6 +140,17 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 	for (i = 0; i < 6; i++) {
 		if (keycode[i] && !memchr(prev_keycode, keycode[i], 6)) {
 			unsigned char key = hid_to_linux_keycode[keycode[i]];
+			if (key == KEY_CAPSLOCK) {
+				if (capslock == true) {
+					input_report_key(input, KEY_LEFTSHIFT, 0);
+					capslock = false;
+				} else {
+					capslock = true;
+				}
+			}
+
+			if (capslock)
+				input_report_key(input, KEY_LEFTSHIFT, 1);
 			input_report_key(input, key, 1);
 		}
 	}

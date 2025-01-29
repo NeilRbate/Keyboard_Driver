@@ -1,5 +1,9 @@
 #include "../include/include.h"
 
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Julien Barbate");
+MODULE_DESCRIPTION("This is an USB keyboard device driver");
+
 struct usb_device_id keyboard_table [] = {
         { USB_DEVICE(USB_KEYBOARD_VENDOR_ID, USB_KEYBOARD_PRODUCT_ID) },
         { }
