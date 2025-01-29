@@ -1,5 +1,8 @@
 #include "../include/include.h"
 
+bool	is_kp(unsigned char keycode);
+unsigned char convert_kp(unsigned char keycode);
+
 const int hid_to_linux_keycode[256] = {
 	//Row 1
 	[0x29] = KEY_ESC,
@@ -93,6 +96,33 @@ const int hid_to_linux_keycode[256] = {
 	[0x50] = KEY_LEFT,
 	[0x51] = KEY_DOWN,
 	[0x4F] = KEY_RIGHT,
+
+	//NUMPAD ROW 1
+	[0x53] = KEY_NUMLOCK,
+	[0x54] = KEY_KPSLASH,
+	[0x55] = KEY_KPASTERISK,
+	[0x56] = KEY_KPMINUS,
+
+	//NUMPAD ROW 2
+	[0x5F] = KEY_KP7,
+	[0x60] = KEY_KP8,
+	[0x61] = KEY_KP9,
+	[0x57] = KEY_KPPLUS,
+	
+	//NUMPAD ROW 3
+	[0x5C] = KEY_KP4,
+	[0x5D] = KEY_KP5,
+	[0x5E] = KEY_KP6,
+	
+	//NUMPAD ROW 4
+	[0x59] = KEY_KP1,
+	[0x5A] = KEY_KP2,
+	[0x5B] = KEY_KP3,
+	[0x58] = KEY_KPENTER,
+
+	//NUMPAD ROW 5
+	[0x62] = KEY_KP0,
+	[0x63] = KEY_KPDOT,
 };
 
 static const struct {
@@ -107,6 +137,42 @@ static const struct {
 	{0x40, KEY_RIGHTALT},
 };
 
+bool	is_kp(unsigned char keycode)
+{
+	if (keycode >= 0x54 && keycode <= 0x63)
+		return true;
+	return false;
+}
+
+unsigned char convert_kp(unsigned char keycode)
+{
+	switch (keycode) {
+
+	case 0x59:
+		return KEY_END;
+	case 0x5A:
+		return KEY_DOWN;
+	case 0x5B:
+		return KEY_PAGEDOWN;
+	case 0x5C:
+		return KEY_LEFT;
+	case 0x5E:
+		return KEY_RIGHT;
+	case 0x5F:
+		return KEY_HOME;
+	case 0x60:
+		return KEY_UP;
+	case 0x61:
+		return KEY_PAGEUP;
+	case 0x62:
+		return KEY_INSERT;
+	case 0x63:
+		return KEY_DELETE;
+	default:
+		return 0;
+	}
+}
+
 int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int size)
 {
 
@@ -116,7 +182,8 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 	unsigned int		modifiers;
 	static unsigned int	prev_modifiers = 0;
 	static unsigned char	prev_keycode[6] = {0};
-	static bool		capslock	= false;
+	static bool		capslock = false;
+	static bool		numlock	= false;
 
 
 	if (size < 8) {
@@ -149,8 +216,19 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 				}
 			}
 
+			if (key == KEY_NUMLOCK)
+				numlock = !numlock;
 			if (capslock)
 				input_report_key(input, KEY_LEFTSHIFT, 1);
+
+			if (!numlock && is_kp(keycode[i])) {
+				key = convert_kp(keycode[i]);
+				input_report_key(input, key, 1);
+				input_report_key(input, key, 0);
+				input_sync(input);
+				return 0;
+			}
+
 			input_report_key(input, key, 1);
 		}
 	}
@@ -159,6 +237,10 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 	for (i = 0; i < 6; i++) {
 		if (prev_keycode[i] && !memchr(keycode, prev_keycode[i], 6)) {
 			unsigned char key = hid_to_linux_keycode[prev_keycode[i]];
+
+			if (!numlock && is_kp(keycode[i]))
+				key = convert_kp(keycode[i]);
+
 			input_report_key(input, key, 0);
 		}
 	}
@@ -170,5 +252,4 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 
 	return 0;
 }
-
 EXPORT_SYMBOL_GPL(parse_hid_report);
