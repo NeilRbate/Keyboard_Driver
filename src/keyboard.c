@@ -25,6 +25,27 @@ void keyboard_irq(struct urb *urb)
 	usb_submit_urb(urb, GFP_ATOMIC);
 }
 
+static	int led_event(struct input_dev *dev, unsigned int type, unsigned int code, int value)
+{
+	unsigned char leds = 0;
+
+	leds |= test_bit(LED_CAPSL, dev->led);
+	leds |= test_bit(LED_NUML, dev->led);
+	leds |= test_bit(LED_SCROLLL, dev->led);
+
+	if (code == LED_CAPSL) {
+		pr_info("CAPSLOCK type -> %d value ->%d\n", type, value);
+	}
+	else if (code == LED_NUML)
+		pr_info("NUMLOCK type -> %d value ->%d\n", type, value);
+	else if (code == LED_SCROLLL)
+		pr_info("SCROLL type -> %d value ->%d\n", type, value);
+
+	pr_info("leds -> %d\n", leds);
+
+	return 0;
+}
+
 int keyboard_probe(struct usb_interface *interface, const struct usb_device_id *id)
 {
 	struct usb_keyboard	*keyboard;
@@ -49,7 +70,9 @@ int keyboard_probe(struct usb_interface *interface, const struct usb_device_id *
 	input_dev->name = "My usb keyboard driver";
 	input_dev->phys = "usb/my_keyboard";
 	input_dev->id.bustype = BUS_USB;
-	input_dev->evbit[0] = BIT(EV_KEY) | BIT(EV_SYN) | BIT(EV_REP);
+	input_dev->event = led_event;
+	input_dev->evbit[0] = BIT(EV_KEY) | BIT(EV_SYN) | BIT(EV_REP) | BIT(EV_LED);
+	input_dev->ledbit[0] = BIT(LED_CAPSL) | BIT(LED_NUML) | BIT(LED_SCROLLL);
 
 	for (int i = 0; i < KEY_CNT; i++)
         	set_bit(i, input_dev->keybit); // Enable every key code

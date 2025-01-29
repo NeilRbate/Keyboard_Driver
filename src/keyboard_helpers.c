@@ -191,6 +191,7 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 		return -EINVAL;
 	}
 
+	
 	input = keyboard->input;
 	keycode = &data[2];
 	modifiers = data[0];
@@ -216,8 +217,9 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 				}
 			}
 
-			if (key == KEY_NUMLOCK)
+			if (key == KEY_NUMLOCK) {
 				numlock = !numlock;
+			}
 			if (capslock)
 				input_report_key(input, KEY_LEFTSHIFT, 1);
 
