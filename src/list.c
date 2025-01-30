@@ -169,25 +169,5 @@ void free_key_event_list(void)
 
 
 	spin_unlock(&event_list_lock);
-
 }
 EXPORT_SYMBOL(free_key_event_list);
-
-void print_key_event_list(void) 
-{
-	struct key_event *cursor, *temp;
-
-	spin_lock(&event_list_lock);
-
-	list_for_each_entry_safe(cursor, temp, &event_list, list) {
-		pr_info("%lld:%lld:%lld Key [%s] Keycode [%d] Ascii Value [%d] State [%s]\n", 
-				(long long)cursor->timestamp.tv_sec % 86400 / 3600,
-				(long long)cursor->timestamp.tv_sec % 3600 / 60,
-				(long long)cursor->timestamp.tv_sec % 60,
-				cursor->key_name, cursor->keycode, cursor->ascii_value,
-				cursor->pressed == 'P' ? "Pressed" : "Release");
-	}
-
-	spin_unlock(&event_list_lock);
-}
-EXPORT_SYMBOL(print_key_event_list);

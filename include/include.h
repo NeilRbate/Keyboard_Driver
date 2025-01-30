@@ -11,6 +11,8 @@
 #include <linux/miscdevice.h>
 #include <linux/fs.h>
 #include <linux/list.h>
+#include <linux/uaccess.h>
+#include <linux/slab.h>
 
 #define USB_KEYBOARD_VENDOR_ID 0x046d
 #define USB_KEYBOARD_PRODUCT_ID 0xc328
@@ -49,10 +51,14 @@ void	keyboard_disconnect(struct usb_interface *interface);
 int	parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int size);
 void	add_key_event(unsigned char keycode, bool pressed);
 void	free_key_event_list(void);
-void	print_key_event_list(void);
 
 ssize_t keyboard_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos);
 int	keyboard_misc_register(void);
 void	keyboard_misc_deregister(void);
+
+void	save_keyboard_log(void);
+
+
+
 
 #endif

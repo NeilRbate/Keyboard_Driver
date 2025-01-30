@@ -115,8 +115,6 @@ void keyboard_disconnect(struct usb_interface *interface)
 {
 	struct usb_keyboard *keyboard = usb_get_intfdata(interface);
 
-	print_key_event_list();
-
 	if (!keyboard) {
 		pr_err("No data to disconnect\n");
 		return;
@@ -140,8 +138,11 @@ void keyboard_disconnect(struct usb_interface *interface)
 	if (keyboard->udev)
 		usb_put_dev(keyboard->udev);
 
-	kfree(keyboard);
+	save_keyboard_log();
 	keyboard_misc_deregister();
+
+	kfree(keyboard);
+
 	free_key_event_list();
 
 	pr_info("Keyboard disconnect properly\n");

@@ -13,8 +13,6 @@ struct miscdevice keyboard_misc_device = {
 
 ssize_t keyboard_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 {
-
-
 	char	*buff;
 	struct	key_event *cursor, *temp;
 	int	len, buff_size, ret;
