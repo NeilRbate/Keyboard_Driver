@@ -8,11 +8,15 @@
 #include <linux/usb.h>
 #include <linux/input.h>
 #include <linux/hid.h>
+#include <linux/miscdevice.h>
+#include <linux/fs.h>
+#include <linux/list.h>
 
 #define USB_KEYBOARD_VENDOR_ID 0x046d
 #define USB_KEYBOARD_PRODUCT_ID 0xc328
 
-static LIST_HEAD(event_list);
+extern struct list_head	event_list;
+extern spinlock_t	event_list_lock;
 
 extern struct usb_driver	keyboard_driver;
 extern struct usb_device_id	keyboard_table[];
@@ -46,5 +50,9 @@ int	parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 void	add_key_event(unsigned char keycode, bool pressed);
 void	free_key_event_list(void);
 void	print_key_event_list(void);
+
+ssize_t keyboard_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos);
+int	keyboard_misc_register(void);
+void	keyboard_misc_deregister(void);
 
 #endif

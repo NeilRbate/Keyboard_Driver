@@ -1,6 +1,7 @@
 #include "../include/include.h"
 
-static DEFINE_SPINLOCK(event_list_lock);
+DEFINE_SPINLOCK(event_list_lock);
+LIST_HEAD(event_list);
 
 static struct key_translation keymap[] = {
     { KEY_A, "a", 'a' },
@@ -179,7 +180,7 @@ void print_key_event_list(void)
 	spin_lock(&event_list_lock);
 
 	list_for_each_entry_safe(cursor, temp, &event_list, list) {
-		pr_info("%lld:%lld:%lld key[%s] keycode[(%d)] ascii_value[%d] state[%s]\n", 
+		pr_info("%lld:%lld:%lld Key [%s] Keycode [%d] Ascii Value [%d] State [%s]\n", 
 				(long long)cursor->timestamp.tv_sec % 86400 / 3600,
 				(long long)cursor->timestamp.tv_sec % 3600 / 60,
 				(long long)cursor->timestamp.tv_sec % 60,

@@ -83,13 +83,22 @@ int keyboard_probe(struct usb_interface *interface, const struct usb_device_id *
 	}
 
 	usb_fill_int_urb(keyboard->irq_urb, keyboard->udev,
-			usb_rcvintpipe(keyboard->udev, 0x81),  // Endpoint 0x81 for IN (Interrupt)
-			keyboard->irq_buf, 8,                  // 8 bytes for the HID report
-			keyboard_irq, keyboard, 10);          // 10ms polling interval
+			usb_rcvintpipe(keyboard->udev, 0x81),  // Endpoint 0x81 for IN (IRQ)
+			keyboard->irq_buf, 8,
+			keyboard_irq, keyboard, 10);
 
 	res = usb_submit_urb(keyboard->irq_urb, GFP_KERNEL);
 	if (res) {
 		pr_err("usb_submit_urb failed\n");
+		usb_free_urb(keyboard->irq_urb);
+		kfree(keyboard->irq_buf);
+		input_unregister_device(input_dev);
+		kfree(keyboard);
+		return res;
+	}
+
+	res = keyboard_misc_register();
+	if (res) {
 		usb_free_urb(keyboard->irq_urb);
 		kfree(keyboard->irq_buf);
 		input_unregister_device(input_dev);
@@ -132,7 +141,7 @@ void keyboard_disconnect(struct usb_interface *interface)
 		usb_put_dev(keyboard->udev);
 
 	kfree(keyboard);
-
+	keyboard_misc_deregister();
 	free_key_event_list();
 
 	pr_info("Keyboard disconnect properly\n");
