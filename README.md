@@ -58,6 +58,9 @@ cat /dev/keyboard_module
 ## ⚠️ Important Notice
 This driver is created **for learning purposes only** and is **not intended for production environments**, it's only work with **my keyboard**, each key is registered by hand.
 
+## 📜 License
+This project is licensed under the GNU GENERAL PUBLIC LICENSE. See the LICENSE file for details.
+
 ## 👨‍💻 Author
 
 [Julien Barbate](https://github.com/NeilRbate)
