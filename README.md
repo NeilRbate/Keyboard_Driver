@@ -7,9 +7,9 @@ This project is a **Linux device driver for a keyboard**, developed for learning
 ## ✨ Features
 
 - Detects **key press and release** events
-- Registers a **character device** in `/dev/keyboard_module`
+- Registers a **character device** in `/dev/keyboard_module` who list all key used
 - Implements **interrupt handling** for key events
-- Logs key events to the file `/tmp/keyboard_log`
+- Logs key events to the file `/tmp/keyboard_log` when driver is unload
 - Fully compatible with **Linux Kernel 6.10.12**
 
 ## 🚀 Installation Guide
@@ -47,6 +47,7 @@ Once the driver is loaded, it registers a device in `/dev/keyboard_module`. You 
 ```sh
 cat /dev/keyboard_module
 ```
+This module output all of the key (pressed or unpressed)
 
 ## 🛠️ Prerequisites
 
