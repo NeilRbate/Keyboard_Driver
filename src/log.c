@@ -7,7 +7,8 @@ static void write_log_to_file(const char *data)
 
 	pos = 0;
 
-	file = filp_open("/tmp/keyboard_log", O_CREAT | O_WRONLY | O_TRUNC, 0644);
+	file = filp_open("/tmp/keyboard_log", O_CREAT | O_WRONLY
+						| O_TRUNC, 0644);
 	if (IS_ERR(file)) {
 		pr_err("failed to open file /tmp/keyboard_log\n");
 		return;
@@ -27,7 +28,7 @@ static void increment_pressed_key(unsigned char keycode)
 void save_keyboard_log(void)
 {
 	char	*buff;
-	int 	len, size;
+	int	len, size;
 	struct key_event *cursor, *temp;
 
 
@@ -53,9 +54,10 @@ void save_keyboard_log(void)
 	size = 4096;
 
 	len += snprintf(buff + len, size - len, "      --- Keyboard stat log ---\n" );
-	len += snprintf(buff + len, size - len, 
+	len += snprintf(buff + len, size - len,
 			"ROW 1:   ESC[%d]  F1[%d]  F2[%d] F3[%d] F4[%d] F5[%d] F6[%d] F7[%d] F8[%d] F9[%d] F10[%d] F11[%d]   F12[%d] PRINT[%d] SCROLLL[%d] BREAK[%d]\n",
-			key_pressed_count[KEY_ESC], key_pressed_count[KEY_F1], key_pressed_count[KEY_F2], key_pressed_count[KEY_F3],
+			key_pressed_count[KEY_ESC],
+			key_pressed_count[KEY_F1], key_pressed_count[KEY_F2], key_pressed_count[KEY_F3],
 		       	key_pressed_count[KEY_F4], key_pressed_count[KEY_F5], key_pressed_count[KEY_F6], key_pressed_count[KEY_F7],
 			key_pressed_count[KEY_F8], key_pressed_count[KEY_F9], key_pressed_count[KEY_F10], key_pressed_count[KEY_F11],
 			key_pressed_count[KEY_F12] ,key_pressed_count[KEY_PRINT], key_pressed_count[KEY_SCROLLLOCK], key_pressed_count[KEY_BREAK]);

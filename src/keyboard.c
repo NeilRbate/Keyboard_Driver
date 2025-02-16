@@ -8,7 +8,7 @@ void keyboard_irq(struct urb *urb)
 
 	keyboard = urb->context;
 	data = urb->transfer_buffer;
-       	size = urb->actual_length;
+	size = urb->actual_length;
 
 	if (urb->status) {
 
@@ -25,7 +25,8 @@ void keyboard_irq(struct urb *urb)
 	usb_submit_urb(urb, GFP_ATOMIC);
 }
 
-int keyboard_probe(struct usb_interface *interface, const struct usb_device_id *id)
+int keyboard_probe(struct usb_interface *interface,
+		   const struct usb_device_id *id)
 {
 	struct usb_keyboard	*keyboard;
 	struct input_dev	*input_dev;
@@ -49,11 +50,13 @@ int keyboard_probe(struct usb_interface *interface, const struct usb_device_id *
 	input_dev->name = "My usb keyboard driver";
 	input_dev->phys = "usb/my_keyboard";
 	input_dev->id.bustype = BUS_USB;
-	input_dev->evbit[0] = BIT(EV_KEY) | BIT(EV_SYN) | BIT(EV_REP) | BIT(EV_LED);
-	input_dev->ledbit[0] = BIT(LED_CAPSL) | BIT(LED_NUML) | BIT(LED_SCROLLL);
+	input_dev->evbit[0] = BIT(EV_KEY) | BIT(EV_SYN)
+				| BIT(EV_REP) | BIT(EV_LED);
+	input_dev->ledbit[0] = BIT(LED_CAPSL) | BIT(LED_NUML)
+				| BIT(LED_SCROLLL);
 
 	for (int i = 0; i < KEY_CNT; i++)
-        	set_bit(i, input_dev->keybit); // Enable every key code
+		set_bit(i, input_dev->keybit); // Enable every key code
 
 	res = input_register_device(input_dev);
 	if (res) {

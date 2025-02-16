@@ -170,7 +170,8 @@ static unsigned char convert_kp(unsigned char keycode)
 	}
 }
 
-int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int size)
+int parse_hid_report(struct usb_keyboard *keyboard,
+		     unsigned char *data, int size)
 {
 
 	int			i;
@@ -188,17 +189,18 @@ int parse_hid_report(struct usb_keyboard *keyboard, unsigned char *data, int siz
 		return -EINVAL;
 	}
 
-	
 	input = keyboard->input;
 	keycode = &data[2];
 	modifiers = data[0];
 
 	//Search for pressed modifiers key (Shift, Ctrl, Alt)
 	for (i = 0; i < 6; i++) {
-		if ((modifiers & modifiers_key[i].mask) != (prev_modifiers & modifiers_key[i].mask)) {
+		if ((modifiers & modifiers_key[i].mask)
+		    != (prev_modifiers & modifiers_key[i].mask)) {
 			add_key_event(modifiers_key[i].keycode, true);
 			input_report_key(input, modifiers_key[i].keycode,
-					(modifiers & modifiers_key[i].mask) ? 1 : 0);
+					(modifiers & modifiers_key[i].mask)
+					? 1 : 0);
 		}
 	}
 
